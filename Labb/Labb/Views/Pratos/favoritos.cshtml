@@ -1,0 +1,46 @@
+﻿@{
+    ViewData["title"] = "Lista de Favoritos";
+    List<PratoDoDium> pratosfavoritos = (List<PratoDoDium>)ViewData["favoritos"];
+}
+@foreach (PratoDoDium prato in pratosfavoritos)
+{
+    <div class="row">
+        <div class="col-3">
+            <img class="img-fluid" src="@prato.Foto" alt="Capa de Restaurante" />
+        </div>
+        <div class="col-6">
+            <p><b>@prato.Nome</b></p>
+            <p><b>@prato.restaurante.Nome</b></p>
+            <p>@prato.Descricao</p>
+        </div>
+        <div class="col-3 text-center">
+            <input type="text" class="form-control" value="@prato.DataPrato.ToString("dd/MM/yyyy")" disabled>
+            <p class="mt-2">@prato.Preco.ToString("0.00")€</p>
+            <button class="btn btn-danger" onclick="RemFromFavClick(this);" data-plate="@prato.IdPrato">Remover dos Favoritos</button>
+        </div>
+    </div>
+}
+@section scripts{ 
+<script type="text/javascript">
+    function RemFromFavClick(element) {
+        let plateid = $(element).attr("data-plate");
+        $.ajax({
+            type: "GET",
+            url: "/api/Pratos/Favorito",
+            data: {
+                idPrato: plateid
+            }
+        }).done((resp) => {
+            if (resp == "Removed") {
+                toastr.success('Prato removido dos favoritos com sucesso!', 'Favoritos');
+                $(element).parent().parent().remove();
+            } else {
+                toastr.error('Prato adicionado aos favoritos com sucesso!', 'Favoritos');
+                console.log("WTF!!!!");
+            }
+        }).catch((resp) => {
+            toastr.error('Não foi possivel remover o prato dos favoritos', 'Favoritos');
+        });
+    }
+</script>
+}

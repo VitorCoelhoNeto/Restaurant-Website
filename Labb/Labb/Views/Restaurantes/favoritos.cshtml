@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["title"] = "Lista de Favoritos";
+    List<Restaurante> Restsfavs = (List<Restaurante>)ViewData["favoritos"];
+}
+@foreach (Restaurante rest in Restsfavs)
+{
+    <div class="row">
+        <div class="col-3">
+            <img class="img-fluid" src="@rest.Foto" alt="Capa de Restaurante" />
+        </div>
+        <div class="col-6">
+            <p><b>@rest.Nome</b></p>
+            <p><b>@rest.HoraDeAbertura - @rest.HoraDeFecho</b></p>
+            <p>@rest.Descricao</p>
+        </div>
+        <div class="col-3 text-center">
+            <button class="btn btn-danger" data-rest="@rest.IdUtilizador" onclick="RemFromFavClick(this);">Remover dos Favoritos</button>
+        </div>
+    </div>
+}
+@section scripts{
+<script type="text/javascript">
+    function RemFromFavClick(element) {
+        let rid = $(element).attr("data-rest");
+        $.ajax({
+            type: "GET",
+            url: "/api/restaurantes/Favorito",
+            data: {
+                idRestaurante: rid
+            }
+        }).done((resp) => {
+            if (resp == "Removed") {
+                toastr.success('Restaurante removido dos favoritos com sucesso!', 'Favoritos');
+                $(element).parent().parent().remove();
+            } else {
+                toastr.error('Restaurante adicionado aos favoritos com sucesso!', 'Favoritos');
+                console.log("WTF!!!!");
+            }
+        }).catch((resp) => {
+            toastr.error('Não foi possivel adicionar/remover o Restaurante aos favoritos', 'Favoritos');
+        });
+    }
+</script>
+} 

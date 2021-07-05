@@ -1,0 +1,105 @@
+﻿@using Labb.Data
+@inject ApplicationDbContext _appdb
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Coma Aqui!</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css" integrity="sha512-3pIirOrwegjM6erE5gPSwkUzO+3cTjpnV9lexlNZqvupR64iZBnOOTiiLPb9M36zpMScbmUNIcHUqKD47M719g==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    @*/////////*@
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha2/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-dark">
+        <a asp-area="" asp-controller="Home" asp-action="Index">
+            <img class="img-responsive ml-2" alt="Coma aqui" src="~/Images/Logo.png" width="50" height="50" />
+        </a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse ml-2 mr-2" id="navbarText">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="navbar-brand text-white" asp-area="" asp-controller="Home" asp-action="Index">Coma Aqui!</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav m-auto">
+                @if (Context.User.UserHasType(_appdb, string.Empty) || Context.User.UserHasType(_appdb, "admin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-area="" asp-controller="Restaurantes" asp-action="Favoritos">Restaurantes Favoritos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-area="" asp-controller="Pratos" asp-action="Favoritos">Pratos Favoritos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-area="" asp-controller="Pratos" asp-action="Index">Pratos do dia</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-area="" asp-controller="Restaurantes" asp-action="Index">Restaurantes</a>
+                    </li>
+                }
+                @if (Context.User.UserHasType(_appdb, "rest") && _appdb.Restaurantes.Find(int.Parse(Context.User.GetUserId())).Validado)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-area="" asp-controller="Restaurantes" asp-action="pratos">Adicionar Prato do dia</a>
+                    </li>
+                }
+                @if (Context.User.UserHasType(_appdb, "admin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-area="" asp-controller="Manage" asp-action="clientes">Clientes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-area="" asp-controller="Manage" asp-action="restaurantes">Aceitar Restaurantes</a>
+                    </li>
+                }
+
+            </ul>
+            <ul class="d-flex justify-content-end">
+                <partial name="_LoginPartial" />
+            </ul>
+        </div>
+    </nav>
+
+
+    @if (!string.IsNullOrEmpty((string)ViewData["container-type"]))
+    {
+        <div class="@ViewData["container-type"]">
+            <main role="main" class="pb-3 mt-4">
+                @RenderBody()
+            </main>
+        </div>
+    }
+    else
+    {
+        <div class="container">
+            <main role="main" class="pb-3 mt-4">
+                @RenderBody()
+            </main>
+        </div>
+    }
+
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @RenderSection("Scripts", required: false)
+
+
+
+
+
+
+
+
+</body>
+</html>

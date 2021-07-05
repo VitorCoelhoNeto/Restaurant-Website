@@ -1,0 +1,169 @@
+﻿@{
+    ViewData["title"] = "Editar Prato do dia";
+}
+@*Novo Prato*@
+<div class="card mt-2">
+    <div class="card-header">
+        <h3>Criar Prato do Dia</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-6">
+                <div class="form-group">
+                    <label for="nameinput">Nome do Prato:</label>
+                    <input type="text" class="form-control" id="nameinput" placeholder="Nome do Prato" />
+                </div>
+                <div class="form-group">
+                    <label for="descinput">Descrição do Prato:</label>
+                    <textarea class="form-control" placeholder="Descrição do Prato" id="descinput"></textarea>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label for="typeinput">Tipo de Prato:</label>
+                            <select id="typeinput" class="form-control">
+                                <option value="vegan">Vegetariano</option>
+                                <option value="meat">Carne</option>
+                                <option value="fish">Peixe</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <label for="priceinput">Preço do Prato:</label>
+                        <input type="number" class="form-control" id="priceinput" placeholder="Preço do Prato" />
+                    </div>
+                </div>
+                <div class="form-group mt-2">
+                    <label for="imginput">Imagem do Prato:</label><br/>
+                    <input type="file" accept="image/jpeg, image/png" id="imginput" class="form-control-file" />
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary mt-2" id="SaveNewPlate">Criar novo prato</button>
+    </div>
+</div>
+
+<div id="main"></div>
+
+@section scripts{ 
+<script type="text/javascript">
+    let __yeoldelement = [];
+    $(document).ready(() => {
+        $.ajax({
+            type: "GET",
+            url: "/api/restaurantes/GetPlates"
+        }).done((resp) => {
+            __yeoldelement = resp;
+            resp.forEach(elem => {
+                CreateElement(elem);
+            });
+        }).catch((resp) => {
+            toastr.error("Não foi possivel obter os pratos do dia", "Pratos do Dia");
+        });
+    });
+
+    $("#SaveNewPlate").on("click", () => {
+        let nome = $("#nameinput").val();
+        let desc = $("#descinput").val();
+        let tipo = $("#typeinput").val();
+        let preco = $("#priceinput").val();
+        let image = $("#imginput")[0].files[0];
+        let simulatedform = new FormData();
+        simulatedform.append('nome', nome);
+        simulatedform.append('desc', desc);
+        simulatedform.append('tipo', tipo);
+        simulatedform.append('preco', preco);
+        simulatedform.append('image', image);
+        $.ajax({
+            type: "POST",
+            url: "/api/restaurantes/CreatePlate",
+            data: simulatedform,
+            processData: false,
+            contentType: false
+        }).done((resp) => {
+            toastr.success("prato criado com sucesso", "Pratos");
+            CreateElement(resp);
+        }).catch((resp) => {
+            toastr.error("Não foi possivel criar o prato", "Pratos");
+        });
+    });
+
+    function CreateElement(element) {
+        $("#main").append(`<div class="card mt-2" onclick="OnOldClick(this);" data-oldid="${element.idPrato}">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <label for="nameinput${element.idPrato}">Nome do Prato:</label>
+                                                <input type="text" class="form-control" id="nameinput${element.idPrato}" placeholder="Nome do Prato" value="${element.nome}" readonly />
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="descinput${element.idPrato}">Descrição do Prato:</label>
+                                                <textarea class="form-control" placeholder="Descrição do Prato" id="descinput${element.idPrato}" readonly>${element.descricao}</textarea>
+                                            </div>
+                                            <button class="btn btn-danger mt-2" onclick="DeleteSelf(this);">Apagar Prato</button>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="form-group">
+                                                        <label for="typeinput${element.idPrato}">Tipo de Prato:</label>
+                                                        <input type="text" class="form-control" id="typeinput${element.idPrato}" placeholder="Tipo de Prato" value="${ConvertTipoPrato(element.tipoPrato)}" readonly/>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <label for="priceinput${element.idPrato}">Preço do Prato:</label>
+                                                    <input type="number" class="form-control" id="priceinput${element.idPrato}" placeholder="Preço do Prato" value="${element.preco}" readonly />
+                                                </div>
+                                            </div>
+                                            <div class="form-group mt-2">
+                                                <img class="img-fluid" src="${element.foto}" alt="Imagem do Prato${element.idPrato}" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`);
+    }
+
+    function ConvertTipoPrato(tp) {
+        if (tp == "meat") {
+            return `Carne`;
+        } else if (tp == "fish") {
+            return `Peixe`;
+        } else if (tp == "vegan") {
+            return `Vegetariano`;
+        } else {
+            return `Desconhecido`;
+        }
+    }
+
+    function OnOldClick(clickedelement) {
+        __yeoldelement.forEach(element => {
+            if (element.idPrato == $(clickedelement).attr("data-oldid")) {
+                $("#nameinput").val(element.nome);
+                $("#descinput").val(element.descricao);
+                $("#typeinput").val(element.tipoPrato);
+                $("#priceinput").val(element.preco)
+            }
+        });
+    }
+
+    function DeleteSelf(element) {
+        __yeoldelement.forEach(oldy => {
+            if (oldy.idPrato == $(element).parent().parent().parent().parent().attr("data-oldid")) {
+                $.ajax({
+                    type: "DELETE",
+                    url: `/api/restaurantes/DeletePlate/${oldy.idPrato}`
+                }).done((resp) => {
+                    toastr.success("O Prato foi apagado com sucesso!", "Pratos");
+                    $(element).parent().parent().parent().parent().remove();
+                }).catch((resp) => {
+                    toastr.error("Não foi possivel apagar o prato por favor recarregue a página e tente novamente", "Pratos");
+                });
+            }
+        })
+    }
+</script>
+}

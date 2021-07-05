@@ -1,0 +1,92 @@
+﻿@{
+    ViewData["title"] = "Restaurantes";
+    List<Restaurante> restaurantes = (List<Restaurante>)ViewData["Restaurantes"];
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Telefone</th>
+            <th>Morada</th>
+            <th>Dia Descanso</th>
+            <th>Tipo</th>
+            <th>Hora abertura</th>
+            <th>Hora fecho</th>
+            <th>Descriçao</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Restaurante res in restaurantes)
+        {
+            string tipo = "";
+            if (res.TipoTakeaway.HasValue?res.TipoTakeaway.Value:false)
+            {
+                tipo += "Takeaway";
+            }
+            if (res.TipoLocal.HasValue ? res.TipoLocal.Value : false)
+            {
+                if (!string.IsNullOrEmpty(tipo))
+                {
+                    tipo += ",";
+                }
+                tipo += "Local";
+            }
+            if (res.TipoEntrega.HasValue ? res.TipoEntrega.Value : false)
+            {
+                if (!string.IsNullOrEmpty(tipo))
+                {
+                    tipo += ",";
+                }
+                tipo += "Entrega";
+            }
+        <tr>
+            <td>@res.Nome</td>
+            <td>@res.Telefone</td>
+            <td>@res.Morada</td>
+            <td>@res.DiaDescanso</td>
+            <td>@tipo</td>
+            <td>@res.HoraDeAbertura</td>
+            <td>@res.HoraDeFecho</td>
+            <td>@res.Descricao</td>
+            <td><button class="btn btn-danger mr-1" onclick="Deny(this);" data-restid="@res.IdUtilizador">Recusar</button><button class="btn btn-success ml-1" onclick="Accept(this);" data-restid="@res.IdUtilizador">Aceitar</button></td>
+        </tr>
+        }
+    </tbody>
+</table>
+
+@section scripts{ 
+    <script type="text/javascript">
+        function Deny(element) {
+            let idrestaurante = $(element).attr("data-restid");
+            $.ajax({
+                type: "POST",
+                url: "/api/manage/DenyRestaurante",
+                data: {
+                    RID: idrestaurante
+                }
+            }).done((resp) => {
+                toastr.success("Restaurante recusado com sucesso!", "Administração");
+                $(element).parent().parent().remove();
+            }).catch((resp) => {
+                toastr.error("Não foi possivel recusar o restaurante, por favor atualize a página e tente novamente", "Administração");
+            });
+        }
+        function Accept(element) {
+            let idrestaurante = $(element).attr("data-restid");
+            $.ajax({
+                type: "POST",
+                url: "/api/manage/AcceptRestaurante",
+                data: {
+                    RID: idrestaurante
+                }
+            }).done((resp) => {
+                toastr.success("Restaurante Aceite com sucesso!", "Administração");
+                $(element).parent().parent().remove();
+            }).catch((resp) => {
+                toastr.error("Não foi possivel Aceitar o restaurante, por favor atualize a página e tente novamente", "Administração");
+            });
+        }
+    </script>
+}

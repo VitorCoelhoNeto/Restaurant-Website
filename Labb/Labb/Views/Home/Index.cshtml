@@ -1,0 +1,109 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="row">
+    <div class="col-6 text-center">
+        <h2><b>Descubra os melhores pratos dos melhores restaurantes</b></h2>
+        <div class="row mt-5">
+            <div class="col-6">
+                <h3><b> O que deseja?</b></h3>
+                <p><b>Pesquisar Restaurante</b></p>
+                <input id="NomeRestaurante" type="text" placeholder="Nome Restaurante" class="form-control">
+            </div>
+            <div class="col-6">
+                <h3><b>O que deseja?</b></h3>
+                <p><b>Pesquisar Prato</b></p>
+                <input id="NomePrato" type="text" placeholder="Nome Prato" class="form-control">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <p><b>Onde?</b></p>
+                <input id="NomeLocalizacao" type="text" placeholder="Localização" class="form-control">
+            </div>
+            <div class="col-6 mt-5">
+                <select id="Tipo" class="form-control">
+                    <option selected value="">Tipo de Prato</option>
+                    <option value="Vegan">Vegan</option>
+                    <option value="Carne">Carne</option>
+                    <option value="Peixe">Peixe</option>
+                </select>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col-6">
+                <button id="BtnRestaurante" class="btn btn-outline-dark">Pesquisar Restaurante</button>
+            </div>
+            <div class="col-6">
+                <button id="BtnPrato" class="btn btn-outline-dark">Pesquisar Prato</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+        @await Html.PartialAsync("Carousel")
+    </div>
+</div>
+
+
+
+@section scripts{ 
+<script type="text/javascript">
+    $("#NomeRestaurante").on("keyup", () => {
+        let conteudo = $("#NomeRestaurante").val();
+        if (conteudo.length != 0) {
+            ChangeState(["NomePrato", "Tipo", "BtnPrato"], true);
+        }
+        else {
+            ChangeState(["NomePrato", "Tipo", "BtnPrato"], false);
+        }
+    });
+    $("#NomeLocalizacao").on("keyup", () => {
+        let conteudo = $("#NomeLocalizacao").val();
+        if (conteudo.length != 0) {
+            ChangeState(["NomePrato", "Tipo", "BtnPrato"], true);
+        }
+        else {
+            ChangeState(["NomePrato", "Tipo", "BtnPrato"], false);
+        }
+    });
+
+    $("#NomePrato").on("keyup", () => {
+        let conteudo = $("#NomePrato").val();
+        if (conteudo.length != 0) {
+            ChangeState(["NomeRestaurante", "NomeLocalizacao", "BtnRestaurante"], true);
+        }
+        else {
+            ChangeState(["NomeRestaurante", "NomeLocalizacao", "BtnRestaurante"], false);
+        }
+    });
+
+    $("#Tipo").on("change", () => {
+        let conteudo = $("#Tipo").val();
+        if (conteudo != "") {
+            ChangeState(["NomeRestaurante", "NomeLocalizacao", "BtnRestaurante"], true);
+        }
+        else {
+            ChangeState(["NomeRestaurante", "NomeLocalizacao", "BtnRestaurante"], false);
+        }
+    });
+    $("#BtnRestaurante").on("click", () => {
+        let nomerest = $("#NomeRestaurante").val();
+        let addr = $("#NomeLocalizacao").val();
+        window.location.href = encodeURI(`/restaurantes?NomeRest=${nomerest}&Addr=${addr}`);
+    });
+    $("#BtnPrato").on("click", () => {
+        let nomeprato = $("#NomePrato").val();
+        let nometipo = $("#Tipo").val();
+        window.location.href = encodeURI(`/pratos?NomePrato=${nomeprato}&Tipo=${nometipo}`);
+    });
+    function ChangeState(ids, state) {
+        ids.forEach((id) => {
+            $(`#${id}`).attr("readonly", state);
+            $(`#${id}`).attr("disabled", state);
+        });
+    }
+    
+</script>
+
+}

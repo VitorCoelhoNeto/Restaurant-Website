@@ -1,0 +1,105 @@
+﻿@{
+    ViewData["title"] = "Clientes";
+    List<Cliente> clientes = (List<Cliente>)ViewData["clientes"];
+}
+
+<div class="modal fade" id="BloqueioModal" tabindex="-1" role="dialog" aria-labelledby="BloqueioModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="BloqueioModalLabel">Bloquear Utilizador</h5>
+                <button type="button" class="close btn" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="BloqueioTempo">Tempo de Bloqueio:</label>
+                    <input id="BloqueioTempo" class="form-control" type="number" placeholder="Tempo de Bloqueio" />
+                </div>
+                <div class="form-group">
+                    <label for="RazaoBloqueio">Razão do bloqueio:</label>
+                    <textarea id="RazaoBloqueio" class="form-control" placeholder="Razão do bloqueio"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="FinalBlock">Bloquear</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>UserName</th>
+            <th>Email</th>
+            <th>Estado</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(Cliente cli in clientes)
+        {
+            bool blocked = cli.IdUtilizadorNavigation.BloqueadoValor.HasValue? cli.IdUtilizadorNavigation.BloqueadoValor.Value:false;
+            <tr>
+                <td>@cli.IdUtilizadorNavigation.UserName</td>
+                <td>@cli.IdUtilizadorNavigation.Email</td>
+                <td>@(blocked?Html.Raw("Bloqueado"):Html.Raw("Normal"))</td>
+                <td><button class="btn btn-danger mr-1" data-uid="@cli.IdUtilizador" data-name="@cli.IdUtilizadorNavigation.UserName" onclick="StartBlock(this);">Bloquear</button><button class="btn btn-success ml-1" data-uid="@cli.IdUtilizador" onclick="UpgradeUser(this);">Promover a administrador</button></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section scripts{ 
+<script type="text/javascript">
+    function UpgradeUser(element) {
+        let uid = $(element).attr("data-uid");
+        $.ajax({
+            type: "POST",
+            url: "/api/manage/UpgradeUser",
+            data: {
+                UID: uid
+            }
+        }).done((resp) => {
+            toastr.success("Utilizador promovido a administrador com sucesso!", "Administração");
+            $(element).parent().parent().delete();
+        }).catch((resp) => {
+            toastr.error("Não foi possivel promover o utilizador a administrador", "Administração");
+        });
+    }
+    function StartBlock(element) {
+        let uid = $(element).attr("data-uid");
+        let username = $(element).attr("data-name");
+        $("#BloqueioModalLabel").text(`Bloquear Utilizador: ${username}`);
+        $("#BloqueioModal").modal("toggle");
+        $("#FinalBlock").attr("data-uid", uid);
+    }
+    $("#FinalBlock").on("click", () => {
+        let tempoblock = $("#BloqueioTempo").val();
+        let razao = $("#RazaoBloqueio").val();
+        let UID = $("#FinalBlock").attr("data-uid");
+        $.ajax({
+            type: "POST",
+            url: "/api/manage/BlockUser",
+            data: {
+                UID: UID,
+                razao: razao,
+                duracao: tempoblock
+            }
+        }).done((resp) => {
+            toastr.success(`Cliente Bloqueado por ${tempoblock} hora/s`, "Administração");
+            $("#BloqueioModal").modal("toggle");
+            $("#BloqueioTempo").val("");
+            $("#RazaoBloqueio").val("");
+        }).catch((resp) => {
+            toastr.error("Não foi possivel bloquear o cliente por favor recaregue a página e tente novamente", "Administração");
+            $("#BloqueioModal").modal("toggle");
+            $("#BloqueioTempo").val("");
+            $("#RazaoBloqueio").val("");
+        });
+    });
+</script>
+}

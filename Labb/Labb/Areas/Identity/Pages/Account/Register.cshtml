@@ -1,0 +1,175 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Registar";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-route-returnUrl="@Model.ReturnUrl" method="post" enctype="multipart/form-data">
+            <h4>Não perca as novidades dos seus restaurantes preferidos! É gratuito</h4>
+            <hr />
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Input.UserName"></label>
+                <input asp-for="Input.UserName" class="form-control" />
+                <span asp-validation-for="Input.UserName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Email"></label>
+                <input asp-for="Input.Email" class="form-control" />
+                <span asp-validation-for="Input.Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Password"></label>
+                <input asp-for="Input.Password" class="form-control" />
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.ConfirmPassword"></label>
+                <input asp-for="Input.ConfirmPassword" class="form-control" />
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="TipoConta" id="exampleRadios1" value="option1" checked>
+                <label class="form-check-label" for="exampleRadios1">
+                    Cliente
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="TipoConta" id="exampleRadios2" value="option2">
+                <label class="form-check-label" for="exampleRadios2">
+                    Restaurante
+                </label>
+            </div>
+            <div id="ClientePart">
+
+            </div>
+            <div id="RestaurantePart">
+                <div class="form-group">
+                    <label for="RestNameBox">Nome do Restaurante</label>
+                    <input type="text" class="form-control" id="RestNameBox" name="RestNameBox" aria-describedby="userHelp" placeholder="Nome do Restaurante">
+                </div>
+                <div class="form-group">
+                    <label for="Telefone">Telefone</label>
+                    <input type="text" class="form-control" id="Telefone" name="Telefone" aria-describedby="userHelp" placeholder="Telefone">
+                </div>
+                <div class="form-group">
+                    <label for="Address">Morada</label>
+                    <input type="text" class="form-control" id="Address" name="Address" aria-describedby="userHelp" placeholder="Morada">
+                </div>
+                <div class="form-group">
+                    <label for="DDS">Dia de Descanço</label>
+                    <select type="text" @*list="DiasDaSemana"*@ class="form-control" id="DDS" name="DDS" aria-describedby="userHelp" placeholder="Dia de Descanço">
+                        @*<datalist id="DiasDeSemana">*@
+                        <option value="Placeholder" selected disabled>--Selecione Dia de Descanso--</option>
+                        <option value="Segunda">Segunda</option>
+                        <option value="Terça">Terça</option>
+                        <option value="Quarta">Quarta</option>
+                        <option value="Quinta">Quinta</option>
+                        <option value="Sexta">Sexta</option>
+                        <option value="Sabado">Sábado</option>
+                        <option value="Domingo">Domingo</option>
+
+                        @*</datalist>*@
+                    </select>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="takeaway" name="takeaway">
+                    <label class="form-check-label" for="flexCheckDefault">
+                        Take Away
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="local" name="local">
+                    <label class="form-check-label" for="flexCheckDefault">
+                        Local
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="entrega" name="entrega">
+                    <label class="form-check-label" for="flexCheckDefault">
+                        Entrega
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="OpenTime">Hora de Abertura</label>
+                    <input type="text" class="form-control" id="OpenTime" name="OpenTime" aria-describedby="userHelp" placeholder="Hora de Abertura">
+                </div>
+                <div class="form-group">
+                    <label for="CloseTime">Hora de Fecho</label>
+                    <input type="text" class="form-control" id="CloseTime" name="CloseTime" aria-describedby="userHelp" placeholder="Hora de Fecho">
+                </div>
+                <div class="form-group">
+                    <label for="DescRest">Descrição</label>
+                    <textarea class="form-control" id="DescRest" name="DescRest" rows="5"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="exampleFormControlFile1">Foto de Restaurante</label>
+                    <input type="file" accept="image/png, image/jpeg" class="form-control-file" id="ProfilePicture" name="ProfilePicture">
+                </div>
+            </div>
+            <div class="mt-2">
+                <button type="submit" class="btn btn-primary">Register</button>
+            </div>
+        </form>
+    </div>
+    @*<div class="col-md-6 col-md-offset-2">
+        <section>
+            <h4>Use another service to register.</h4>
+            <hr />
+            @{
+                if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                {
+                    <div>
+                        <p>
+                            There are no external authentication services configured. See <a href="https://go.microsoft.com/fwlink/?LinkID=532715">this article</a>
+                            for details on setting up this ASP.NET application to support logging in via external services.
+                        </p>
+                    </div>
+                }
+                else
+                {
+                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                        <div>
+                            <p>
+                                @foreach (var provider in Model.ExternalLogins)
+                                {
+                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                                }
+                            </p>
+                        </div>
+                    </form>
+                }
+            }
+        </section>
+    </div>*@
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script type="text/javascript">
+        $("#RestaurantePart").hide();
+        $("#exampleRadios1").on("change", () => {
+            $("#ClientePart").show();
+            $("#RestaurantePart").hide();
+            $("#RestNameBox").val("");
+            $("#Telefone").val("");
+            $("#Address").val("");
+            $("#DDS").val("");
+            $("#OpenTime").val("");
+            $("#CloseTime").val("");
+            $("#DescRest").val("");
+            $("#takeaway").prop("checked", false);
+            $("#local").prop("checked", false);
+            $("#entrega").prop("checked", false);
+        });
+        $("#exampleRadios2").on("change", () => {
+            $("#ClientePart").hide();
+            $("#RestaurantePart").show();
+            $("#UserNameBox").val("");
+        })
+    </script>
+}

@@ -1,0 +1,194 @@
+﻿@{
+    ViewData["title"] = "Pesquisar Restaurante";
+    ViewData["container-type"] = "container-fluid";
+}
+<div class="row">
+    <div class="col-3">
+        <button class="btn btn-outline-primary mb-2" id="DisplayType"><i class="far fa-eye"></i> Tipo de apresentação</button>
+        <input type="text" class="form-control" placeholder="Pesquisar" id="searchbox" />
+        <p class="mt-2"><b>Tipo:</b></p>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="takeaway">
+            <label class="form-check-label" for="flexCheckDefault">
+                Take Away
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="local">
+            <label class="form-check-label" for="flexCheckDefault">
+                Local
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="entrega">
+            <label class="form-check-label" for="flexCheckDefault">
+                Entrega
+            </label>
+        </div>
+        <p class="mt-2"><b>Horario de Funcionamento:</b></p>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="manha">
+            <label class="form-check-label" for="flexCheckDefault">
+                Manha
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="tarde">
+            <label class="form-check-label" for="flexCheckDefault">
+                Tarde
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="noite">
+            <label class="form-check-label" for="flexCheckDefault">
+                Noite
+            </label>
+        </div>
+        <p class="mt-2"><b>Morada:</b></p>
+        <input type="text" placeholder="Morada" class="form-control" id="morada" />
+        <button class="btn btn-outline-dark mt-4" id="search">Pesquisar</button>
+    </div>
+    <div class="col-9" id="restaurantes">
+        @*NO CONTENT POPULATED BY JS*@
+    </div>
+</div>
+@section scripts{ 
+<script type="text/javascript">
+    let pagetype = "PLANE";
+    let lastresults = null;
+    $("#DisplayType").on("click", () => {
+        if (pagetype == "PLANE") {
+            pagetype = "COMPLEX";
+        } else {
+            pagetype = "PLANE";
+        }
+        if (lastresults != null) {
+            RenderPage(lastresults);
+        }
+    });
+    $("#search").on("click", () => {
+        let takeaway = $("#takeaway").is(":checked");
+        let local = $("#local").is(":checked");
+        let entrega = $("#entrega").is(":checked");
+        let manha = $("#manha").is(":checked");
+        let tarde = $("#tarde").is(":checked");
+        let noite = $("#noite").is(":checked");
+        let morada = $("#morada").val();
+        let search = $("#searchbox").val();
+        $.ajax({
+            type: "GET",
+            url: "/api/restaurantes",
+            data:
+            {
+                takeaway: takeaway,
+                local: local,
+                entrega: entrega,
+                manha: manha,
+                tarde: tarde,
+                noite: noite,
+                morada: morada,
+                nome: search
+            }
+        }).done((resp) => {
+            lastresults = resp;
+            RenderPage(resp);
+        });
+    });
+    function AddToFavClick(element) {
+        let rid = $(element).attr("data-rest");
+        $.ajax({
+            type: "GET",
+            url: "/api/restaurantes/Favorito",
+            data: {
+                idRestaurante: rid
+            }
+        }).done((resp) => {
+            if (resp == "Removed") {
+                toastr.success('Restaurante removido dos favoritos com sucesso!', 'Favoritos');
+            } else {
+                toastr.success('Restaurante adicionado aos favoritos com sucesso!', 'Favoritos');
+            }
+        }).catch((resp) => {
+            toastr.error('Não foi possivel adicionar/remover o Restaurante aos favoritos', 'Favoritos');
+        });
+    }
+    function RenderPage(resp) {
+        $("#restaurantes").html("");
+        if (pagetype == "PLANE") {
+            let elements = [];
+            //CODIGO PARA PLANE ELEMENTS
+            resp.forEach((rest) => {
+                elements.push(CreatePlaneElement(rest));
+            });
+            let i = 0;
+            let finalhtml = "";
+            while (i < elements.length) {
+                let stopat = i + 3;
+                finalhtml += "<div class=\"row\">";
+                for (i; i < stopat; i++) {
+                    if (i < elements.length) {
+                        finalhtml += "<div class=\"col-4\"><div class=\"card\"><div class=\"card-body\">" + elements[i] + "</div></div></div>";
+                    }
+                }
+                finalhtml += "</div>";
+            }
+            $("#restaurantes").append(finalhtml);
+        } else {
+            //CODIGO PARA COMPLEX ELEMENTS
+            let finalhtml = "";
+            resp.forEach((rest) => {
+                finalhtml += "<div class=\"card\"><div class=\"card-body\">" + CreateComplexElement(rest) + "</div></div>";
+            });
+            $("#restaurantes").append(finalhtml);
+        }
+    }
+    function CreatePlaneElement(rest) {
+        return `<div>
+                    <img class="img-fluid" src="${rest.foto}" alt="Capa de Restaurante"/><br/>
+                    <div class="text-center">
+                        <button class="btn btn-outline-dark mt-2" data-rest="${rest.idUtilizador}" onclick="AddToFavClick(this);">Favorito</button>
+                    </div>
+                </div>`;
+    }
+    function CreateComplexElement(rest) {
+        return `<div class="row">
+                    <div class="col-3">
+                        <img class="img-fluid" src="${rest.foto}" alt="Capa de Restaurante"/>
+                    </div>
+                    <div class="col-6">
+                        <p><b>${rest.nome}</b></p>
+                        <p><b>${rest.horaDeAbertura} - ${rest.horaDeFecho}</b></p>
+                        <p>${rest.descricao}</p>
+                    </div>
+                    <div class="col-3">
+                        <button class="btn btn-outline-dark mt-4" data-rest="${rest.idUtilizador}" onclick="AddToFavClick(this);">Favorito</button>
+                    </div>
+                </div>`;
+    }
+</script>
+@if ((bool)ViewData["FirstSearch"])
+{
+    <script type="text/javascript">
+        let morada = '@ViewData["Addr"]';
+        let search = '@ViewData["NomeRest"]';
+        $.ajax({
+            type: "GET",
+            url: "/api/restaurantes",
+            data:
+            {
+                takeaway: false,
+                local: false,
+                entrega: false,
+                manha: false,
+                tarde: false,
+                noite: false,
+                morada: morada,
+                nome: search
+            }
+        }).done((resp) => {
+            lastresults = resp;
+            RenderPage(resp);
+        });
+    </script>
+}
+}
